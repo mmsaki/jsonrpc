@@ -39,7 +39,7 @@ const rpc_map = {
     handler: (_) => "0x01"
   },
   eth_blockNumber: {
-    validateParams: (params: unknown): params is undefined | [] | {}  => validateEmptyParams(params),
+    validateParams: (params: unknown): params is undefined | [] | {} => validateEmptyParams(params),
     handler: (_) => "0x244"
     
   },
