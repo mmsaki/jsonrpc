@@ -142,7 +142,7 @@ type RPCRequest = {
   jsonrpc: JSONRpcVersion 
   id: ID
   method: Method
-  params: any
+  params?: any
 }
 
 type RPCResponse = {
