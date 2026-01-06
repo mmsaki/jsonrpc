@@ -139,11 +139,13 @@ type  RPRCHandler<P = unknown, R = unknown> = {
 
 type ID = number | string | null
 type JSONRpcVersion = "2.0"
+const METHODS = ["eth_chainId", "eth_add", "eth_blockNumber"] as const
+type Method = typeof METHODS[number]
 
 type RPCReq = {
   jsonrpc: JSONRpcVersion 
   id: ID
-  method: string
+  method: Method
   params: any
 }
 
