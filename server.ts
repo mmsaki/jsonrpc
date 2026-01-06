@@ -4,7 +4,7 @@ const server = Bun.serve({
 
     // accept only POST requests
     if (req.method !== "POST") {
-      return new Response(JSON.stringify(serverError("Accepts only POST methods")))
+      return Response.json(serverError("Accepts only POST methods"))
     }
 
     let payload: unknown;
@@ -14,15 +14,15 @@ const server = Bun.serve({
 
       // handle batch jsonrpc requests
       if (Array.isArray(payload)) {
-        return new Response(JSON.stringify(handleBatch(payload)));
+        return Response.json(handleBatch(payload));
       }
 
       // handle single josnrpc request
-      return new Response(JSON.stringify(handleSingle(payload)))
+      return Response.json(handleSingle(payload))
     } catch (err) {
 
       // req is not valid json
-      return new Response(JSON.stringify(parseError()));
+      return Response.json(parseError());
     }
   }
 })
