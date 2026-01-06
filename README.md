@@ -39,3 +39,7 @@ curl http://localhost:4000 \
   -H "Content-Type: application/json" \
   -d '[{ "jsonrpc": "2.0", "method": "eth_chainId", "params": [], "id": 1 },{ "jsonrpc": "2.0", "method": "eth_add", "params": [100,2], "id": 2 }]'
 ```
+
+## Resources
+
+- [JSON-RPC Specification](https://www.jsonrpc.org/specification)
