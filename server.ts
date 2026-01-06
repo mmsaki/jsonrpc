@@ -4,11 +4,7 @@ const server = Bun.serve({
 
     // accept only POST requests
     if (req.method !== "POST") {
-      return new Response(JSON.stringify({
-        jsonrpc: "2.0",
-        id: null,
-        error: { code: CodeError.ServerError, message: "Accepts only POST methods"}
-      } as RPCRes))
+      return new Response(JSON.stringify(serverError("Accepts only POST methods")))
     }
 
     let payload: unknown;
@@ -76,7 +72,7 @@ function validateEmptyParams(params: unknown) {
   )
 }
 
-function handleSingle(payload: unknown): RPCRes {
+function handleSingle(payload: unknown): RPCResponse {
   // req body is not valid jsonrpc
   if (typeof payload !== "object" || payload === null) {
     return invalidRequest();
@@ -92,7 +88,7 @@ function handleSingle(payload: unknown): RPCRes {
   }
 
   // req is valid jsonrpc
-  const data = payload as RPCReq;
+  const data = payload as RPCRequest;
   const entry = rpc_map[data.method];
 
   // method not found
@@ -112,18 +108,18 @@ function handleSingle(payload: unknown): RPCRes {
       jsonrpc: "2.0",
       id: data.id,
       result: result
-    } as RPCRes 
+    } as RPCResponse 
   } catch (err)  {
     // rpc call failed
     return internalError(data.id);
   }
 }
 
-function handleBatch(batch: unknown[]): RPCRes[]  {
+function handleBatch(batch: unknown[]): RPCResponse[]  {
   if (batch.length === 0) {
     return [invalidRequest()];
   }
-  const responses: RPCRes[] = []
+  const responses: RPCResponse[] = []
   for (const item of batch) {
     const res = handleSingle(item)
     if (res) responses.push(res)
@@ -142,14 +138,14 @@ type JSONRpcVersion = "2.0"
 const METHODS = ["eth_chainId", "eth_add", "eth_blockNumber"] as const
 type Method = typeof METHODS[number]
 
-type RPCReq = {
+type RPCRequest = {
   jsonrpc: JSONRpcVersion 
   id: ID
   method: Method
   params: any
 }
 
-type RPCRes = {
+type RPCResponse = {
   jsonrpc: JSONRpcVersion
   id?: ID
   result?: any
@@ -171,27 +167,27 @@ enum CodeError {
   ServerError = -32000,
 }
 
-function invalidRequest(): RPCRes {
+function invalidRequest(): RPCResponse {
   return {
     jsonrpc: "2.0",
     error: {
       code: CodeError.InvalidRequest,
       message: "invalid request"
     }
-  } as RPCRes
+  } as RPCResponse
 }
 
-function parseError(): RPCRes { 
+function parseError(): RPCResponse { 
   return {
     jsonrpc: "2.0",
     error: {
       code: CodeError.ParseError,
       message: "parse error"
     }
-  } as RPCRes
+  } as RPCResponse
 }
 
-function methodNotFound(id: ID): RPCRes { 
+function methodNotFound(id: ID): RPCResponse { 
   return {
     jsonrpc: "2.0",
     id: id,
@@ -199,10 +195,10 @@ function methodNotFound(id: ID): RPCRes {
       code: CodeError.MethodNotFound,
       message: "method not found"
     }
-  } as RPCRes
+  } as RPCResponse
 }
 
-function invalidParams(id: ID): RPCRes {
+function invalidParams(id: ID): RPCResponse {
   return {
     jsonrpc: "2.0",
     id: id,
@@ -210,10 +206,10 @@ function invalidParams(id: ID): RPCRes {
       code: CodeError.InvalidParams,
       message: "invalid params"
     }
-  } as RPCRes
+  } as RPCResponse
 }
 
-function internalError(id: ID): RPCRes {
+function internalError(id: ID): RPCResponse {
   return {
     jsonrpc: "2.0",
     id: id,
@@ -221,5 +217,12 @@ function internalError(id: ID): RPCRes {
       code: CodeError.InternalError,
       message: "internal error"
     }
-  } as RPCRes
+  } as RPCResponse
+}
+function serverError(message: string): RPCResponse {
+  return {
+    jsonrpc: "2.0",
+    id: null,
+    error: { code: CodeError.ServerError, message: message}
+  } as RPCResponse
 }
